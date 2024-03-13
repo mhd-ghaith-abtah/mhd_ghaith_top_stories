@@ -5,6 +5,4 @@ class Constants {
   static const applicationJson = "application/json";
   static const contentType = "content-type";
   static const accept = "accept";
-  static const authorization = "X-Token";
-  static const timeout = 60 * 1000;
 }
