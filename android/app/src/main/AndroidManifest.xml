@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="mhd_ghaith_top_stories"
+        android:label="Top stories"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
