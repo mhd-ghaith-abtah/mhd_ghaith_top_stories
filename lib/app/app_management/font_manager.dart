@@ -6,10 +6,7 @@ class FontConstants {
 }
 
 class FontWeightManager {
-  static const FontWeight thin = FontWeight.w100;
-  static const FontWeight light = FontWeight.w300;
   static const FontWeight regular = FontWeight.w400;
-  static const FontWeight medium = FontWeight.w500;
   static const FontWeight bold = FontWeight.bold;
 }
 
@@ -55,34 +52,6 @@ TextStyle _getTextStyle(
   );
 }
 
-/// thin NewsCycle font style
-TextStyle getThinTextStyle({
-  double fontSize = 12.0,
-  required Color color,
-  TextDecoration? decoration,
-}) {
-  return _getTextStyle(
-    fontSize,
-    FontWeightManager.thin,
-    color,
-    decoration: decoration,
-  );
-}
-
-/// light NewsCycle font style
-TextStyle getLightTextStyle({
-  double fontSize = 12.0,
-  required Color color,
-  TextDecoration? decoration,
-}) {
-  return _getTextStyle(
-    fontSize,
-    FontWeightManager.light,
-    color,
-    decoration: decoration,
-  );
-}
-
 /// regular NewsCycle font style
 TextStyle getRegularTextStyle({
   double fontSize = 12.0,
@@ -92,20 +61,6 @@ TextStyle getRegularTextStyle({
   return _getTextStyle(
     fontSize,
     FontWeightManager.regular,
-    color,
-    decoration: decoration,
-  );
-}
-
-/// medium NewsCycle font style
-TextStyle getMediumTextStyle({
-  double fontSize = 12.0,
-  required Color color,
-  TextDecoration? decoration,
-}) {
-  return _getTextStyle(
-    fontSize,
-    FontWeightManager.medium,
     color,
     decoration: decoration,
   );

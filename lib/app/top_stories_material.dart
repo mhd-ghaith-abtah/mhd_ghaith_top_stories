@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mhd_ghaith_top_stories/app/app_configurations/app_configurations.dart';
 import 'package:mhd_ghaith_top_stories/app/app_management/route_manager.dart';
+import 'package:mhd_ghaith_top_stories/app/app_management/theme_manager.dart';
 import 'package:mhd_ghaith_top_stories/core/utils/constants.dart';
 
 class TopStoriesMaterial extends StatefulWidget {
@@ -33,7 +34,7 @@ class _KeepFitMaterialState extends State<TopStoriesMaterial> {
           debugShowCheckedModeBanner: false,
           title: AppConfigurations.applicationName,
           routerConfig: RouteGenerator.router,
-          // theme: getApplicationTheme(),
+          theme: getApplicationTheme(),
         ),
       );
 }
