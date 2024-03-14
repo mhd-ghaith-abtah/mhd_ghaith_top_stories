@@ -1,26 +1,29 @@
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:mhd_ghaith_top_stories/app/storage/app_storage.dart';
 import 'package:mhd_ghaith_top_stories/core/features/data/remote_data_source/http_client.dart';
 import 'package:mhd_ghaith_top_stories/core/network/dio_factory.dart';
 import 'package:mhd_ghaith_top_stories/core/network/network_info.dart';
+import 'package:mhd_ghaith_top_stories/features/splash/presentation/bloc/splash_cubit/splash_cubit.dart';
+import 'package:mhd_ghaith_top_stories/features/top_stories/data/remote/repositories/top_stories_repository.dart';
+import 'package:mhd_ghaith_top_stories/features/top_stories/domain/use_cases/get_top_stories_use_case.dart';
+import 'package:mhd_ghaith_top_stories/features/top_stories/presentation/bloc/top_stories_bloc/top_stories_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final instance = GetIt.instance;
 
 Future<void> initAppModule() async {
   ///register flutter Secure Storage as lazy singleton
-  if (!GetIt.I.isRegistered<FlutterSecureStorage>()) {
-    const FlutterSecureStorage flutterSecureStorage = FlutterSecureStorage();
-    instance.registerLazySingleton<FlutterSecureStorage>(
-      () => flutterSecureStorage,
-    );
+  if (!GetIt.I.isRegistered<SharedPreferences>()) {
+    final SharedPreferences sharedPreferences =
+        await SharedPreferences.getInstance();
+    instance.registerLazySingleton<SharedPreferences>(() => sharedPreferences);
   }
 
   ///register app storage as lazy singleton
   if (!GetIt.I.isRegistered<AppStorage>()) {
     instance.registerLazySingleton<AppStorage>(
-        () => AppStorage(instance<FlutterSecureStorage>()));
+        () => AppStorage(instance<SharedPreferences>()));
   }
 
   ///register network info as lazy singleton
@@ -39,6 +42,36 @@ Future<void> initAppModule() async {
   if (!GetIt.I.isRegistered<HttpClient>()) {
     instance.registerLazySingleton<HttpClient>(() => HttpClient(
           instance<DioFactory>().getDio(),
+        ));
+  }
+}
+
+void initSplashModule() {
+  ///register splash cubit as factory
+  if (!GetIt.I.isRegistered<SplashCubit>()) {
+    instance.registerFactory<SplashCubit>(
+        () => SplashCubit(instance<AppStorage>()));
+  }
+}
+
+void initTopStoriesModule() {
+  ///register top stories repository as lazy singleton
+  if (!GetIt.I.isRegistered<TopStoriesRepository>()) {
+    instance.registerLazySingleton<TopStoriesRepository>(
+        () => TopStoriesRepository(instance<HttpClient>()));
+  }
+
+  ///register get top stories use case as lazy singleton
+  if (!GetIt.I.isRegistered<GetTopStoriesUseCase>()) {
+    instance.registerLazySingleton<GetTopStoriesUseCase>(
+        () => GetTopStoriesUseCase(instance<TopStoriesRepository>()));
+  }
+
+  ///register top stories bloc as factory
+  if (!GetIt.I.isRegistered<TopStoriesBloc>()) {
+    instance.registerFactory<TopStoriesBloc>(() => TopStoriesBloc(
+          instance<AppStorage>(),
+          instance<GetTopStoriesUseCase>(),
         ));
   }
 }

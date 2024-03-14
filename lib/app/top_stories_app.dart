@@ -3,13 +3,10 @@ import 'package:mhd_ghaith_top_stories/app/app_management/app_lifecycle_event_ha
 import 'package:mhd_ghaith_top_stories/app/top_stories_material.dart';
 
 class TopStoriesApp extends StatefulWidget {
-  /// named constructor
   const TopStoriesApp._internal();
 
-  /// singleton or single instance
   static const TopStoriesApp _instance = TopStoriesApp._internal();
 
-  /// factory
   factory TopStoriesApp() => _instance;
 
   @override

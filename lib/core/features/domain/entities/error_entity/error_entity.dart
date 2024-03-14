@@ -1,10 +1,9 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:mhd_ghaith_top_stories/core/features/domain/entities/entity.dart';
 
 part 'error_entity.g.dart';
 
 @JsonSerializable()
-class ErrorEntity extends Entity {
+class ErrorEntity {
   @JsonKey(name: "fault")
   final FaultModel? fault;
 
@@ -14,9 +13,6 @@ class ErrorEntity extends Entity {
       _$ErrorEntityFromJson(json);
 
   Map<String, dynamic> toJson() => _$ErrorEntityToJson(this);
-
-  @override
-  List<Object?> get props => [fault];
 }
 
 @JsonSerializable()

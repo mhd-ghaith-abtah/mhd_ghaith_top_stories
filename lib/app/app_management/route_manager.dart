@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
+import 'package:mhd_ghaith_top_stories/app/dependency_injection/dependency_injection.dart';
+import 'package:mhd_ghaith_top_stories/features/splash/presentation/screens/splash_screen.dart';
+import 'package:mhd_ghaith_top_stories/features/top_stories/presentation/screens/top_stories_screen.dart';
 
 class Routes {
   static const String splashRoute = "/";
+  static const String topStoriesRoute = "/topStories";
 }
 
 class RoutesPaths {}
@@ -14,7 +18,17 @@ class RouteGenerator {
     routes: <GoRoute>[
       GoRoute(
         path: Routes.splashRoute,
-        builder: (BuildContext context, GoRouterState state) => Container(),
+        builder: (BuildContext context, GoRouterState state) {
+          initSplashModule();
+          return const SplashScreen();
+        },
+      ),
+      GoRoute(
+        path: Routes.topStoriesRoute,
+        builder: (BuildContext context, GoRouterState state) {
+          initTopStoriesModule();
+          return const TopStoriesScreen();
+        },
       ),
     ],
   );

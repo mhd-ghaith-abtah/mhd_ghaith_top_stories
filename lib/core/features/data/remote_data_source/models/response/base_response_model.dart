@@ -1,5 +1,3 @@
-import 'package:mhd_ghaith_top_stories/core/features/domain/entities/entity.dart';
-
 // ignore_for_file: non_constant_identifier_names
 abstract class BaseResponseModel {
   String? status;
@@ -9,6 +7,4 @@ abstract class BaseResponseModel {
   int? num_results;
 
   Map<String, dynamic> toJson() => {};
-
-  Entity toEntity();
 }
