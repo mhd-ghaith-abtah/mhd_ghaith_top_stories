@@ -6,6 +6,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:mhd_ghaith_top_stories/app/app_management/color_manager.dart';
 import 'package:mhd_ghaith_top_stories/app/app_management/font_manager.dart';
 import 'package:mhd_ghaith_top_stories/app/app_management/route_manager.dart';
+import 'package:mhd_ghaith_top_stories/app/app_management/strings_manager.dart';
 import 'package:mhd_ghaith_top_stories/features/top_stories/data/remote/models/response/top_stories_api_response.dart';
 
 class NewsArticleTile extends StatelessWidget {
@@ -80,25 +81,25 @@ class NewsArticleTile extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // Title of the article
-                          if (story?.title != null)
-                            Text(
-                              story!.title!,
-                              maxLines: 2,
-                              style: getBoldTextStyle(
-                                  color: ColorManager.black,
-                                  fontSize: FontSize.s14),
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                          Text(
+                            story!.title!,
+                            maxLines: 2,
+                            style: getBoldTextStyle(
+                                color: ColorManager.black,
+                                fontSize: FontSize.s14),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                           const SizedBox(height: 3),
                           // Author
-                          if (story?.byline != null)
-                            Text(
-                              story!.byline!,
-                              style: getRegularTextStyle(
-                                  color: ColorManager.black),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 2,
-                            ),
+                          Text(
+                            story?.byline?.isNotEmpty == true
+                                ? story!.byline!
+                                : AppStrings.unknownAuthor,
+                            style:
+                                getRegularTextStyle(color: ColorManager.black),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 2,
+                          ),
                           const SizedBox(height: 5),
                         ],
                       ),

@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mhd_ghaith_top_stories/app/app_management/strings_manager.dart';
-import 'package:mhd_ghaith_top_stories/app/app_management/values_manager.dart';
 import 'package:mhd_ghaith_top_stories/app/storage/app_storage.dart';
 import 'package:mhd_ghaith_top_stories/core/error_handler/error_handler.dart';
 import 'package:mhd_ghaith_top_stories/core/features/domain/entities/error_entity/error_entity.dart';
@@ -25,6 +25,8 @@ class TopStoriesBloc extends Bloc<TopStoriesEvent, TopStoriesState> {
   final List<TopStoryModel> _stories = List.empty(growable: true);
   final List<TopStoryModel> _storiesSearchResult = List.empty(growable: true);
   bool _isListView = true;
+  bool _showFilters = false;
+  Section _selectedSection = Section.home;
 
   List<TopStoryModel> get stories => _stories;
 
@@ -32,23 +34,31 @@ class TopStoriesBloc extends Bloc<TopStoriesEvent, TopStoriesState> {
 
   bool get isListView => _isListView;
 
+  bool get showFilters => _showFilters;
+
+  Section get selectedSection => _selectedSection;
+
   TopStoriesBloc(
     this._appStorage,
     this._getTopStoriesUseCase,
   ) : super(TopStoriesInitial(
           stateType: TopStoriesBlocStateType.init,
         )) {
-    on<GetTopStories>(_getTopStoriesEventImpl);
+    on<GetTopStories>(_getTopStoriesEventImpl, transformer: restartable());
 
     on<ChangeViewType>(_changeViewTypeEventImpl);
 
-    on<SearchInStories>(_searchInStoriesEventImpl);
+    on<SearchInStories>(_searchInStoriesEventImpl, transformer: restartable());
+
+    on<ShowHideFilter>(_showHideFilterEventImpl);
   }
 
   FutureOr<void> _getTopStoriesEventImpl(
     GetTopStories event,
     Emitter<TopStoriesState> emit,
   ) async {
+    _selectedSection = event.section;
+    _showFilters = false;
     emit(TopStoriesLoading(stateType: TopStoriesBlocStateType.getStories));
     ErrorEntity? errorEntity;
     TopStoriesResponse? topStoriesResponse;
@@ -92,6 +102,7 @@ class TopStoriesBloc extends Bloc<TopStoriesEvent, TopStoriesState> {
       });
 
       if (isError) {
+        _stories.clear();
         emit(TopStoriesError(
           stateType: errorEntity?.fault?.faultDetails?.errorCode ==
                   ResponseCode.noInternetConnection.toString()
@@ -100,10 +111,15 @@ class TopStoriesBloc extends Bloc<TopStoriesEvent, TopStoriesState> {
           errorMessage: errorEntity?.fault?.faultString ?? AppStrings.unKnown,
         ));
       } else {
-        _stories
-          ..clear()
-          ..addAll(topStoriesResponse?.result ?? []);
         if (topStoriesResponse != null) {
+          _stories.clear();
+          for (var story in topStoriesResponse!.result!) {
+            if (story.title?.isNotEmpty == true &&
+                story.abstract?.isNotEmpty == true &&
+                story.multimedia?.isNotEmpty == true) {
+              _stories.add(story);
+            }
+          }
           // cache new stories
           CacheTopStoriesModel cacheTopStoriesModel = CacheTopStoriesModel(
             cacheDate: DateTime.now(),
@@ -140,7 +156,7 @@ class TopStoriesBloc extends Bloc<TopStoriesEvent, TopStoriesState> {
     _storiesSearchResult.clear();
     if (event.searchText.isNotEmpty) {
       emit(TopStoriesLoading(stateType: TopStoriesBlocStateType.search));
-      await Future.delayed(AppDurations.fast);
+      await Future.delayed(const Duration(milliseconds: 75));
       for (var story in _stories) {
         String? authorSplitResult = story.byline?.replaceAll("By ", " ");
         authorSplitResult = authorSplitResult?.replaceAll(", ", " ");
@@ -161,5 +177,15 @@ class TopStoriesBloc extends Bloc<TopStoriesEvent, TopStoriesState> {
       _storiesSearchResult.clear();
       emit(TopStoriesLoaded(stateType: TopStoriesBlocStateType.getStories));
     }
+  }
+
+  FutureOr<void> _showHideFilterEventImpl(
+    ShowHideFilter event,
+    Emitter<TopStoriesState> emit,
+  ) async {
+    _showFilters = event.isShow ?? !_showFilters;
+    final currentState = state;
+    emit(TopStoriesLoaded(stateType: TopStoriesBlocStateType.showHideFilters));
+    emit(currentState);
   }
 }

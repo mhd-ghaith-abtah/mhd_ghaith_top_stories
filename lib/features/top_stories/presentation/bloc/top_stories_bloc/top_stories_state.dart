@@ -30,5 +30,6 @@ enum TopStoriesBlocStateType {
   search,
   getStories,
   changeView,
+  showHideFilters,
   noInternet
 }

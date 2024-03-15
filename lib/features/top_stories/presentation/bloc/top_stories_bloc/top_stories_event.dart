@@ -17,3 +17,9 @@ class SearchInStories extends TopStoriesEvent {
 
   SearchInStories({required this.searchText});
 }
+
+class ShowHideFilter extends TopStoriesEvent {
+  final bool? isShow;
+
+  ShowHideFilter({this.isShow});
+}

@@ -9,7 +9,9 @@ import 'package:mhd_ghaith_top_stories/app/app_management/font_manager.dart';
 import 'package:mhd_ghaith_top_stories/app/app_management/strings_manager.dart';
 import 'package:mhd_ghaith_top_stories/app/app_management/values_manager.dart';
 import 'package:mhd_ghaith_top_stories/app/dependency_injection/dependency_injection.dart';
+import 'package:mhd_ghaith_top_stories/core/utils/constants.dart';
 import 'package:mhd_ghaith_top_stories/core/utils/enums.dart';
+import 'package:mhd_ghaith_top_stories/core/utils/extensions.dart';
 import 'package:mhd_ghaith_top_stories/core/utils/utils.dart';
 import 'package:mhd_ghaith_top_stories/features/top_stories/data/remote/models/response/top_stories_api_response.dart';
 import 'package:mhd_ghaith_top_stories/features/top_stories/presentation/bloc/top_stories_bloc/top_stories_bloc.dart';
@@ -73,41 +75,36 @@ class _TopStoriesScreenState extends State<TopStoriesScreen> {
 
   Widget _changeViewButton() => IconButton(
         onPressed: () => _topStoriesBloc.add(ChangeViewType()),
-        icon: BlocBuilder<TopStoriesBloc, TopStoriesState>(
-          builder: (context, state) => Icon(
-            _topStoriesBloc.isListView
-                ? Icons.grid_view_rounded
-                : Icons.format_list_bulleted_rounded,
-          ),
+        icon: Icon(
+          _topStoriesBloc.isListView
+              ? Icons.grid_view_rounded
+              : Icons.format_list_bulleted_rounded,
         ),
       );
 
-  Widget _clearTextFieldButton() =>
-      BlocBuilder<TopStoriesBloc, TopStoriesState>(
-        builder: (context, state) {
-          if (_searchController.text.isNotEmpty) {
-            return IconButton(
-              iconSize: 20.r,
-              padding: EdgeInsets.zero,
-              splashRadius: 1,
-              onPressed: () => _searchController.clear(),
-              icon: Icon(
-                Icons.close,
-                size: 20.r,
-              ),
-            );
-          } else {
-            return Container();
-          }
-        },
-      );
-
-  Widget _filterButton() => IconButton(
-        onPressed: () {},
-        icon: const Icon(Icons.filter_alt_rounded),
+  Widget _clearTextFieldOrFilterButton() => AnimatedCrossFade(
+        firstChild: IconButton(
+          iconSize: 20.r,
+          padding: EdgeInsets.zero,
+          splashRadius: 1,
+          onPressed: () => _searchController.clear(),
+          icon: Icon(
+            Icons.close,
+            size: 20.r,
+          ),
+        ),
+        secondChild: IconButton(
+          onPressed: () => _topStoriesBloc.add(ShowHideFilter()),
+          icon: const Icon(Icons.filter_alt_rounded),
+        ),
+        crossFadeState: _searchController.text.isNotEmpty
+            ? CrossFadeState.showFirst
+            : CrossFadeState.showSecond,
+        duration: AppDurations.superFast,
       );
 
   Widget _searchTextField() => TextField(
+        onTap: () => _topStoriesBloc.add(ShowHideFilter(isShow: false)),
         controller: _searchController,
         style: getBoldTextStyle(
           color: ColorManager.black,
@@ -119,13 +116,36 @@ class _TopStoriesScreenState extends State<TopStoriesScreen> {
         ),
       );
 
-  AppBar _topStoriesAppBar() => AppBar(
+  PreferredSizeWidget _topStoriesAppBar() => AppBar(
         title: _searchTextField(),
+        bottom: _topStoriesBloc.showFilters ? _filters() : null,
         actions: [
-          _clearTextFieldButton(),
-          _filterButton(),
+          _clearTextFieldOrFilterButton(),
           _changeViewButton(),
         ],
+      );
+
+  PreferredSizeWidget _filters() => PreferredSize(
+        preferredSize: Size.fromHeight(.48.sh),
+        child: Container(
+          color: Colors.orange.withOpacity(.5),
+          height: .48.sh,
+          width: double.infinity,
+          child: Wrap(
+            spacing: 2.w,
+            runSpacing: 2.h,
+            children: Constants.filterOptions
+                .map(
+                  (option) => FilterChip(
+                    label: Text(option.getSectionTitle()),
+                    selected: _topStoriesBloc.selectedSection == option,
+                    onSelected: (value) =>
+                        _topStoriesBloc.add(GetTopStories(section: option)),
+                  ),
+                )
+                .toList(),
+          ),
+        ),
       );
 
   Widget _errorView(String errorMessage, {bool noInternet = false}) =>
@@ -151,12 +171,13 @@ class _TopStoriesScreenState extends State<TopStoriesScreen> {
                   color: ColorManager.black,
                   fontSize: FontSize.s18,
                 ),
+                textAlign: TextAlign.center,
               ),
             ),
             SizedBox(height: 10.h),
             ElevatedButton(
-              onPressed: () =>
-                  _topStoriesBloc.add(GetTopStories(section: Section.home)),
+              onPressed: () => _topStoriesBloc
+                  .add(GetTopStories(section: _topStoriesBloc.selectedSection)),
               child: Text(
                 AppStrings.tryAgain,
                 style: getBoldTextStyle(
@@ -211,6 +232,7 @@ class _TopStoriesScreenState extends State<TopStoriesScreen> {
                   color: ColorManager.black,
                   fontSize: FontSize.s20,
                 ),
+                textAlign: TextAlign.center,
               ),
             ),
             SizedBox(height: 10.h),
@@ -227,7 +249,7 @@ class _TopStoriesScreenState extends State<TopStoriesScreen> {
           onRefresh: () async => await Future.delayed(
             AppDurations.fast,
             () => _topStoriesBloc.add(GetTopStories(
-              section: Section.home,
+              section: _topStoriesBloc.selectedSection,
               forceFromAPI: true,
             )),
           ),
@@ -273,29 +295,26 @@ class _TopStoriesScreenState extends State<TopStoriesScreen> {
 
   Widget _screenContent(BuildContext context) => GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
-        child: Scaffold(
-          appBar: _topStoriesAppBar(),
-          body: BlocBuilder<TopStoriesBloc, TopStoriesState>(
-            builder: (context, state) {
-              if (state is TopStoriesLoading) {
-                return _loadingView();
-              } else if (state is TopStoriesLoaded) {
-                return _loadedView(
-                  state.stateType == TopStoriesBlocStateType.search
-                      ? _topStoriesBloc.storiesSearchResult
-                      : _topStoriesBloc.stories,
-                  isSearch: state.stateType == TopStoriesBlocStateType.search,
-                );
-              } else if (state is TopStoriesError) {
-                return _errorView(
-                  state.errorMessage,
-                  noInternet:
-                      state.stateType == TopStoriesBlocStateType.noInternet,
-                );
-              } else {
-                return Container();
-              }
-            },
+        child: BlocBuilder<TopStoriesBloc, TopStoriesState>(
+          builder: (context, state) => Scaffold(
+            appBar: _topStoriesAppBar(),
+            body: state is TopStoriesLoading
+                ? _loadingView()
+                : state is TopStoriesLoaded
+                    ? _loadedView(
+                        state.stateType == TopStoriesBlocStateType.search
+                            ? _topStoriesBloc.storiesSearchResult
+                            : _topStoriesBloc.stories,
+                        isSearch:
+                            state.stateType == TopStoriesBlocStateType.search,
+                      )
+                    : state is TopStoriesError
+                        ? _errorView(
+                            state.errorMessage,
+                            noInternet: state.stateType ==
+                                TopStoriesBlocStateType.noInternet,
+                          )
+                        : Container(),
           ),
         ),
       );

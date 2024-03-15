@@ -58,7 +58,7 @@ class AppStrings {
   static const sundayreviewAPI = "sundayreview";
   static const technologyTitle = "Technology";
   static const technologyAPI = "technology";
-  static const theaterTitle = "theater";
+  static const theaterTitle = "Theater";
   static const theaterAPI = "theater";
   static const t_magazineTitle = "T Magazine";
   static const t_magazineAPI = "t-magazine";
@@ -76,4 +76,6 @@ class AppStrings {
   static const tryAgain = "Try again";
   static const emptyNews = "No news to show";
   static const seeMore = "See more";
+  static const abstract = "Abstract";
+  static const unknownAuthor = "Unknown author";
 }
