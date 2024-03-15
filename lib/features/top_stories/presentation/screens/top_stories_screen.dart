@@ -218,17 +218,32 @@ class _TopStoriesScreenState extends State<TopStoriesScreen> {
         ),
       );
 
-  Widget _storiesView(List<TopStoryModel> stories) {
+  Widget _loadedView(List<TopStoryModel> stories, {bool isSearch = false}) {
     if (stories.isEmpty) {
       return _emptyView();
     } else {
-      if (_topStoriesBloc.isListView) {
-        return ListView.builder(
+      if (!isSearch) {
+        return RefreshIndicator(
+          onRefresh: () async => await Future.delayed(
+            AppDurations.fast,
+            () => _topStoriesBloc.add(GetTopStories(
+              section: Section.home,
+              forceFromAPI: true,
+            )),
+          ),
+          child: _storiesView(stories),
+        );
+      } else {
+        return _storiesView(stories);
+      }
+    }
+  }
+
+  Widget _storiesView(List<TopStoryModel> stories) => _topStoriesBloc.isListView
+      ? ListView.builder(
           itemCount: stories.length,
           itemBuilder: (context, index) => NewsArticleTile(
-            author: stories[index].byline,
-            title: stories[index].title,
-            imageUrl: stories[index].multimedia?.first.url,
+            story: stories[index],
           ) //adding the required animations at the end
               .animate()
               .slideX(
@@ -237,9 +252,8 @@ class _TopStoriesScreenState extends State<TopStoriesScreen> {
                 duration: AppDurations.megaFast,
                 curve: Curves.fastEaseInToSlowEaseOut,
               ),
-        );
-      } else {
-        return GridView.builder(
+        )
+      : GridView.builder(
           itemCount: stories.length,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
@@ -248,19 +262,14 @@ class _TopStoriesScreenState extends State<TopStoriesScreen> {
                 : .44.sh,
           ),
           itemBuilder: (context, index) => NewsArticleGridItem(
-            author: stories[index].byline,
-            title: stories[index].title,
-            imageUrl: stories[index].multimedia?.first.url,
+            story: stories[index],
           ),
         ).animate().slideX(
-              begin: 10,
-              end: 0,
-              duration: AppDurations.megaFast,
-              curve: Curves.fastEaseInToSlowEaseOut,
-            );
-      }
-    }
-  }
+            begin: 10,
+            end: 0,
+            duration: AppDurations.megaFast,
+            curve: Curves.fastEaseInToSlowEaseOut,
+          );
 
   Widget _screenContent(BuildContext context) => GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
@@ -271,10 +280,11 @@ class _TopStoriesScreenState extends State<TopStoriesScreen> {
               if (state is TopStoriesLoading) {
                 return _loadingView();
               } else if (state is TopStoriesLoaded) {
-                return _storiesView(
+                return _loadedView(
                   state.stateType == TopStoriesBlocStateType.search
                       ? _topStoriesBloc.storiesSearchResult
                       : _topStoriesBloc.stories,
+                  isSearch: state.stateType == TopStoriesBlocStateType.search,
                 );
               } else if (state is TopStoriesError) {
                 return _errorView(

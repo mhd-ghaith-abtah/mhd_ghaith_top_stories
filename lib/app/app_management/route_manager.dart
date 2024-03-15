@@ -3,14 +3,24 @@ import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
 import 'package:mhd_ghaith_top_stories/app/dependency_injection/dependency_injection.dart';
 import 'package:mhd_ghaith_top_stories/features/splash/presentation/screens/splash_screen.dart';
+import 'package:mhd_ghaith_top_stories/features/top_stories/data/remote/models/response/top_stories_api_response.dart';
+import 'package:mhd_ghaith_top_stories/features/top_stories/presentation/screens/story_details_screen.dart';
+import 'package:mhd_ghaith_top_stories/features/top_stories/presentation/screens/story_details_web_view_screen.dart';
 import 'package:mhd_ghaith_top_stories/features/top_stories/presentation/screens/top_stories_screen.dart';
 
 class Routes {
   static const String splashRoute = "/";
   static const String topStoriesRoute = "/topStories";
+  static const String storyDetailsRoute = "storyDetails";
+  static const String storyDetailsWebViewRoute = "storyDetailsWebView";
 }
 
-class RoutesPaths {}
+class RoutesPaths {
+  static const String storyDetailsPath =
+      "${Routes.topStoriesRoute}/${Routes.storyDetailsRoute}";
+  static const String storyDetailsWebViewPath =
+      "${Routes.topStoriesRoute}/${Routes.storyDetailsRoute}/${Routes.storyDetailsWebViewRoute}";
+}
 
 class RouteGenerator {
   static final GoRouter router = GoRouter(
@@ -29,6 +39,21 @@ class RouteGenerator {
           initTopStoriesModule();
           return const TopStoriesScreen();
         },
+        routes: <GoRoute>[
+          GoRoute(
+            path: Routes.storyDetailsRoute,
+            builder: (BuildContext context, GoRouterState state) =>
+                StoryDetailsScreen(story: state.extra as TopStoryModel),
+            routes: <GoRoute>[
+              GoRoute(
+                path: Routes.storyDetailsWebViewRoute,
+                builder: (BuildContext context, GoRouterState state) =>
+                    StoryDetailsWebViewScreen(
+                        story: state.extra as TopStoryModel),
+              ),
+            ],
+          ),
+        ],
       ),
     ],
   );

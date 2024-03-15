@@ -18,7 +18,7 @@ class AppStrings {
   static const unKnown = "Something went wrong, try again later";
 
   /// sections
-  static const artsTitle = "arts";
+  static const artsTitle = "Arts";
   static const artsAPI = "arts";
   static const automobilesTitle = "Automobiles";
   static const automobilesAPI = "automobiles";
@@ -75,4 +75,5 @@ class AppStrings {
   static const searchHint = "Search...";
   static const tryAgain = "Try again";
   static const emptyNews = "No news to show";
+  static const seeMore = "See more";
 }

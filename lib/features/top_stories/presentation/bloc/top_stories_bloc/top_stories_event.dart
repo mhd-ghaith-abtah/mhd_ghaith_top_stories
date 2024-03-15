@@ -5,8 +5,9 @@ abstract class TopStoriesEvent {}
 
 class GetTopStories extends TopStoriesEvent {
   final Section section;
+  final bool forceFromAPI;
 
-  GetTopStories({required this.section});
+  GetTopStories({required this.section, this.forceFromAPI = false});
 }
 
 class ChangeViewType extends TopStoriesEvent {}
