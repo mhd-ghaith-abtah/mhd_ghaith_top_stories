@@ -34,6 +34,7 @@ dependencies:
       ref: a9c8114
   loading_animation_widget: ^1.2.1
   flutter_animate: ^4.5.0
+  webview_flutter: ^4.7.0
 
 dev_dependencies:
   flutter_test:

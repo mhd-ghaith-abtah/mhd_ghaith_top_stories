@@ -52,59 +52,74 @@ class TopStoriesBloc extends Bloc<TopStoriesEvent, TopStoriesState> {
     emit(TopStoriesLoading(stateType: TopStoriesBlocStateType.getStories));
     ErrorEntity? errorEntity;
     TopStoriesResponse? topStoriesResponse;
+    bool useCache = false;
+
+    // get cached stories and parse
     final cachedStoriesString = _appStorage.getCachedStories();
-    print("cachedStoriesString $cachedStoriesString");
-    final Map<String, dynamic> cachedStoriesMap =
+    Map<String, dynamic> cachedStoriesMap =
         json.decode(cachedStoriesString ?? "{}");
-    print("cachedStoriesMap $cachedStoriesMap");
     final currentSection = cachedStoriesMap[event.section.name];
-    print("currentSection $currentSection");
+    CacheTopStoriesModel? cachedModel;
     if (currentSection != null) {
-      final cachedModel = CacheTopStoriesModel.fromString(currentSection);
-      print("cachedModel.cacheDate: ${cachedModel.stories.num_results}");
+      cachedModel = CacheTopStoriesModel.fromString(currentSection);
+      // check if still valid
+      if (DateTime.now().difference(cachedModel.cacheDate).inMinutes < 5) {
+        topStoriesResponse = cachedModel.stories;
+        useCache = true;
+      }
     }
-    var res = await _getTopStoriesUseCase.call(
-      TopStoriesParams(
-        body: TopStoriesParamsBody(
-          apiKey: _appStorage.getAPIKey() ?? Constants.empty,
-          section: event.section,
-        ),
-      ),
-    );
-    bool isError = res.fold((l) {
-      errorEntity = l;
-      return true;
-    }, (r) {
-      topStoriesResponse = r;
-      return false;
-    });
-    if (isError) {
-      emit(TopStoriesError(
-        stateType: errorEntity?.fault?.faultDetails?.errorCode ==
-                ResponseCode.noInternetConnection.toString()
-            ? TopStoriesBlocStateType.noInternet
-            : TopStoriesBlocStateType.getStories,
-        errorMessage: errorEntity?.fault?.faultString ?? AppStrings.unKnown,
-      ));
-    } else {
+
+    if (useCache && !event.forceFromAPI) {
       _stories
         ..clear()
         ..addAll(topStoriesResponse?.result ?? []);
-      if (topStoriesResponse != null) {
-        CacheTopStoriesModel cacheTopStoriesModel = CacheTopStoriesModel(
-          cacheDate: DateTime.now(),
-          section: event.section.name,
-          stories: topStoriesResponse!,
-        );
-        cachedStoriesMap.update(
-          event.section.name,
-          (value) => cacheTopStoriesModel.toString(),
-          ifAbsent: () => cacheTopStoriesModel.toString(),
-        );
-        await _appStorage.setCachedStories(
-            stories: json.encode(cachedStoriesMap));
-      }
       emit(TopStoriesLoaded(stateType: TopStoriesBlocStateType.getStories));
+    } else {
+      var res = await _getTopStoriesUseCase.call(
+        TopStoriesParams(
+          body: TopStoriesParamsBody(
+            apiKey: _appStorage.getAPIKey() ?? Constants.empty,
+            section: event.section,
+          ),
+        ),
+      );
+      bool isError = res.fold((l) {
+        errorEntity = l;
+        return true;
+      }, (r) {
+        topStoriesResponse = r;
+        return false;
+      });
+
+      if (isError) {
+        emit(TopStoriesError(
+          stateType: errorEntity?.fault?.faultDetails?.errorCode ==
+                  ResponseCode.noInternetConnection.toString()
+              ? TopStoriesBlocStateType.noInternet
+              : TopStoriesBlocStateType.getStories,
+          errorMessage: errorEntity?.fault?.faultString ?? AppStrings.unKnown,
+        ));
+      } else {
+        _stories
+          ..clear()
+          ..addAll(topStoriesResponse?.result ?? []);
+        if (topStoriesResponse != null) {
+          // cache new stories
+          CacheTopStoriesModel cacheTopStoriesModel = CacheTopStoriesModel(
+            cacheDate: DateTime.now(),
+            section: event.section.name,
+            stories: topStoriesResponse!,
+          );
+          cachedStoriesMap.update(
+            event.section.name,
+            (value) => cacheTopStoriesModel.toString(),
+            ifAbsent: () => cacheTopStoriesModel.toString(),
+          );
+          await _appStorage.setCachedStories(
+              stories: json.encode(cachedStoriesMap));
+        }
+        emit(TopStoriesLoaded(stateType: TopStoriesBlocStateType.getStories));
+      }
     }
   }
 
