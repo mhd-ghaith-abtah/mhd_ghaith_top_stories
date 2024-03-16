@@ -5,6 +5,7 @@ import 'package:mhd_ghaith_top_stories/core/features/data/remote_data_source/htt
 import 'package:mhd_ghaith_top_stories/core/network/dio_factory.dart';
 import 'package:mhd_ghaith_top_stories/core/network/network_info.dart';
 import 'package:mhd_ghaith_top_stories/features/splash/presentation/bloc/splash_cubit/splash_cubit.dart';
+import 'package:mhd_ghaith_top_stories/features/top_stories/data/remote/data_sources/top_stories_remote_data_source.dart';
 import 'package:mhd_ghaith_top_stories/features/top_stories/data/remote/repositories/top_stories_repository.dart';
 import 'package:mhd_ghaith_top_stories/features/top_stories/domain/use_cases/get_top_stories_use_case.dart';
 import 'package:mhd_ghaith_top_stories/features/top_stories/presentation/bloc/top_stories_bloc/top_stories_bloc.dart';
@@ -39,8 +40,8 @@ Future<void> initAppModule() async {
   }
 
   ///register http client as lazy singleton
-  if (!GetIt.I.isRegistered<HttpClient>()) {
-    instance.registerLazySingleton<HttpClient>(() => HttpClient(
+  if (!GetIt.I.isRegistered<TopStoriesHttpClient>()) {
+    instance.registerLazySingleton<TopStoriesHttpClient>(() => TopStoriesHttpClient(
           instance<DioFactory>().getDio(),
         ));
   }
@@ -55,10 +56,19 @@ void initSplashModule() {
 }
 
 void initTopStoriesModule() {
+  ///register top stories remote data source as lazy singleton
+  if (!GetIt.I.isRegistered<TopStoriesRemoteDataSource>()) {
+    instance.registerLazySingleton<TopStoriesRemoteDataSource>(
+        () => TopStoriesRemoteDataSource(instance<TopStoriesHttpClient>()));
+  }
+
   ///register top stories repository as lazy singleton
   if (!GetIt.I.isRegistered<TopStoriesRepository>()) {
-    instance.registerLazySingleton<TopStoriesRepository>(
-        () => TopStoriesRepository(instance<HttpClient>()));
+    instance
+        .registerLazySingleton<TopStoriesRepository>(() => TopStoriesRepository(
+              instance<TopStoriesRemoteDataSource>(),
+              instance<NetworkInfo>(),
+            ));
   }
 
   ///register get top stories use case as lazy singleton

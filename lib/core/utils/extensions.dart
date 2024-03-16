@@ -5,7 +5,7 @@ import 'package:mhd_ghaith_top_stories/core/utils/enums.dart';
 
 extension HTTPRequestType on RequestType {
   Future<Map<String, dynamic>> getHTTPRequestType(
-    HttpClient httpClient,
+    TopStoriesHttpClient httpClient,
     ParamsModel model,
   ) async {
     switch (this) {

@@ -1,0 +1,30 @@
+{
+  "status": "OK",
+  "copyright": "copyright",
+  "section": "section",
+  "last_updated": "last_updated",
+  "num_results": 1,
+  "results": [
+    {
+      "section": "section",
+      "subsection": "subsection",
+      "title": "title",
+      "abstract": "abstract",
+      "url": "url",
+      "byline": "byline",
+      "item_type": "itemType",
+      "updated_date": "2024-03-15T13:39:31-04:00",
+      "created_date": "2024-03-15T13:39:31-04:00",
+      "published_date": "2024-03-15T13:39:31-04:00",
+      "multimedia": [
+        {
+          "url": "url",
+          "height": 10,
+          "width": 10,
+          "type": "type",
+          "caption": "caption"
+        }
+      ]
+    }
+  ]
+}

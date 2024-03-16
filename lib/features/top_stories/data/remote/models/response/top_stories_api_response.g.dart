@@ -8,15 +8,15 @@ part of 'top_stories_api_response.dart';
 
 TopStoriesResponse _$TopStoriesResponseFromJson(Map<String, dynamic> json) =>
     TopStoriesResponse(
+      json['status'] as String?,
+      json['copyright'] as String?,
+      json['section'] as String?,
+      json['last_updated'] as String?,
+      json['num_results'] as int?,
       result: (json['results'] as List<dynamic>?)
           ?.map((e) => TopStoryModel.fromJson(e as Map<String, dynamic>))
           .toList(),
-    )
-      ..status = json['status'] as String?
-      ..copyright = json['copyright'] as String?
-      ..section = json['section'] as String?
-      ..last_updated = json['last_updated'] as String?
-      ..num_results = json['num_results'] as int?;
+    );
 
 Map<String, dynamic> _$TopStoriesResponseToJson(TopStoriesResponse instance) =>
     <String, dynamic>{
@@ -25,7 +25,7 @@ Map<String, dynamic> _$TopStoriesResponseToJson(TopStoriesResponse instance) =>
       'section': instance.section,
       'last_updated': instance.last_updated,
       'num_results': instance.num_results,
-      'results': instance.result,
+      'results': instance.result?.map((e) => e.toJson()).toList(),
     };
 
 TopStoryModel _$TopStoryModelFromJson(Map<String, dynamic> json) =>
@@ -46,9 +46,10 @@ TopStoryModel _$TopStoryModelFromJson(Map<String, dynamic> json) =>
       publishedDate: json['published_date'] == null
           ? null
           : DateTime.parse(json['published_date'] as String),
-    )..multimedia = (json['multimedia'] as List<dynamic>?)
-        ?.map((e) => MultiMedia.fromJson(e as Map<String, dynamic>))
-        .toList();
+      multimedia: (json['multimedia'] as List<dynamic>?)
+          ?.map((e) => MultiMedia.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
 
 Map<String, dynamic> _$TopStoryModelToJson(TopStoryModel instance) =>
     <String, dynamic>{
@@ -62,7 +63,7 @@ Map<String, dynamic> _$TopStoryModelToJson(TopStoryModel instance) =>
       'updated_date': instance.updatedDate?.toIso8601String(),
       'created_date': instance.createdDate?.toIso8601String(),
       'published_date': instance.publishedDate?.toIso8601String(),
-      'multimedia': instance.multimedia,
+      'multimedia': instance.multimedia?.map((e) => e.toJson()).toList(),
     };
 
 MultiMedia _$MultiMediaFromJson(Map<String, dynamic> json) => MultiMedia(

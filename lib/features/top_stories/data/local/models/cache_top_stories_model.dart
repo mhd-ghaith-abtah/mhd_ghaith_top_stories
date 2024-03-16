@@ -12,7 +12,7 @@ class CacheTopStoriesModel {
   @JsonKey(name: "section")
   final String section;
   @JsonKey(name: "stories")
-  final TopStoriesResponse stories;
+  final List<TopStoryModel> stories;
 
   CacheTopStoriesModel({
     required this.cacheDate,

@@ -27,6 +27,6 @@ abstract class ParamsModel<BodyModelType extends BaseBodyModel>
   const ParamsModel({this.body, this.baseUrl});
 }
 
-abstract class BaseBodyModel {
+abstract class BaseBodyModel extends Equatable{
   Map<String, dynamic> toJson();
 }

@@ -1,16 +1,27 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'dart:convert';
 
+import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:mhd_ghaith_top_stories/core/features/data/remote_data_source/models/response/base_response_model.dart';
+import 'package:mhd_ghaith_top_stories/features/top_stories/domain/entities/top_stories_entity.dart';
 
 part 'top_stories_api_response.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class TopStoriesResponse extends BaseResponseModel {
   @JsonKey(name: "results")
-  List<TopStoryModel>? result;
+  final List<TopStoryModel>? result;
 
-  TopStoriesResponse({required this.result});
+  const TopStoriesResponse(
+    super.status,
+    super.copyright,
+    super.section,
+    super.last_updated,
+    super.num_results, {
+    required this.result,
+  });
 
   factory TopStoriesResponse.fromJson(Map<String, dynamic> json) =>
       _$TopStoriesResponseFromJson(json);
@@ -23,34 +34,40 @@ class TopStoriesResponse extends BaseResponseModel {
 
   @override
   String toString() => json.encode(toJson());
+
+  @override
+  TopStoriesEntity toEntity() => TopStoriesEntity(result: result);
+
+  @override
+  List<Object?> get props => [result];
 }
 
-@JsonSerializable()
-class TopStoryModel {
+@JsonSerializable(explicitToJson: true)
+class TopStoryModel extends Equatable {
   @JsonKey(name: "section")
-  String? section;
+  final String? section;
   @JsonKey(name: "subsection")
-  String? subsection;
+  final String? subsection;
   @JsonKey(name: "title")
-  String? title;
+  final String? title;
   @JsonKey(name: "abstract")
-  String? abstract;
+  final String? abstract;
   @JsonKey(name: "url")
-  String? url;
+  final String? url;
   @JsonKey(name: "byline")
-  String? byline;
+  final String? byline;
   @JsonKey(name: "item_type")
-  String? itemType;
+  final String? itemType;
   @JsonKey(name: "updated_date")
-  DateTime? updatedDate;
+  final DateTime? updatedDate;
   @JsonKey(name: "created_date")
-  DateTime? createdDate;
+  final DateTime? createdDate;
   @JsonKey(name: "published_date")
-  DateTime? publishedDate;
+  final DateTime? publishedDate;
   @JsonKey(name: "multimedia")
-  List<MultiMedia>? multimedia;
+  final List<MultiMedia>? multimedia;
 
-  TopStoryModel({
+  const TopStoryModel({
     this.section,
     this.subsection,
     this.title,
@@ -61,28 +78,44 @@ class TopStoryModel {
     this.updatedDate,
     this.createdDate,
     this.publishedDate,
+    this.multimedia,
   });
 
   factory TopStoryModel.fromJson(Map<String, dynamic> json) =>
       _$TopStoryModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$TopStoryModelToJson(this);
+
+  @override
+  List<Object?> get props => [
+        section,
+        subsection,
+        title,
+        abstract,
+        url,
+        byline,
+        itemType,
+        updatedDate,
+        createdDate,
+        publishedDate,
+        multimedia,
+      ];
 }
 
 @JsonSerializable()
-class MultiMedia {
+class MultiMedia extends Equatable {
   @JsonKey(name: "url")
-  String? url;
+  final String? url;
   @JsonKey(name: "height")
-  int? height;
+  final int? height;
   @JsonKey(name: "width")
-  int? width;
+  final int? width;
   @JsonKey(name: "type")
-  String? type;
+  final String? type;
   @JsonKey(name: "caption")
-  String? caption;
+  final String? caption;
 
-  MultiMedia({
+  const MultiMedia({
     this.url,
     this.height,
     this.width,
@@ -94,4 +127,7 @@ class MultiMedia {
       _$MultiMediaFromJson(json);
 
   Map<String, dynamic> toJson() => _$MultiMediaToJson(this);
+
+  @override
+  List<Object?> get props => [url, height, width, type, caption];
 }
