@@ -3,11 +3,11 @@ import 'package:mhd_ghaith_top_stories/app/app_configurations/app_configurations
 import 'package:mhd_ghaith_top_stories/core/features/data/remote_data_source/models/params/params_model.dart';
 import 'package:mhd_ghaith_top_stories/core/utils/constants.dart';
 
-class HttpClient {
+class TopStoriesHttpClient {
   final Dio _dio;
   String? baseUrl;
 
-  HttpClient(
+  TopStoriesHttpClient(
     this._dio, {
     this.baseUrl,
   }) {

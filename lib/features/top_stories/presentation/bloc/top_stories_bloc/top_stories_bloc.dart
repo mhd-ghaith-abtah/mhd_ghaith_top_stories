@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mhd_ghaith_top_stories/app/app_management/strings_manager.dart';
@@ -12,6 +13,7 @@ import 'package:mhd_ghaith_top_stories/core/utils/enums.dart';
 import 'package:mhd_ghaith_top_stories/features/top_stories/data/local/models/cache_top_stories_model.dart';
 import 'package:mhd_ghaith_top_stories/features/top_stories/data/remote/models/params/top_stories_params.dart';
 import 'package:mhd_ghaith_top_stories/features/top_stories/data/remote/models/response/top_stories_api_response.dart';
+import 'package:mhd_ghaith_top_stories/features/top_stories/domain/entities/top_stories_entity.dart';
 import 'package:mhd_ghaith_top_stories/features/top_stories/domain/use_cases/get_top_stories_use_case.dart';
 
 part 'top_stories_event.dart';
@@ -61,7 +63,7 @@ class TopStoriesBloc extends Bloc<TopStoriesEvent, TopStoriesState> {
     _showFilters = false;
     emit(TopStoriesLoading(stateType: TopStoriesBlocStateType.getStories));
     ErrorEntity? errorEntity;
-    TopStoriesResponse? topStoriesResponse;
+    TopStoriesEntity? topStoriesResponse;
     bool useCache = false;
 
     // get cached stories and parse
@@ -74,7 +76,7 @@ class TopStoriesBloc extends Bloc<TopStoriesEvent, TopStoriesState> {
       cachedModel = CacheTopStoriesModel.fromString(currentSection);
       // check if still valid
       if (DateTime.now().difference(cachedModel.cacheDate).inMinutes < 5) {
-        topStoriesResponse = cachedModel.stories;
+        topStoriesResponse = TopStoriesEntity(result: cachedModel.stories);
         useCache = true;
       }
     }
@@ -124,7 +126,7 @@ class TopStoriesBloc extends Bloc<TopStoriesEvent, TopStoriesState> {
           CacheTopStoriesModel cacheTopStoriesModel = CacheTopStoriesModel(
             cacheDate: DateTime.now(),
             section: event.section.name,
-            stories: topStoriesResponse!,
+            stories: topStoriesResponse?.result ?? [],
           );
           cachedStoriesMap.update(
             event.section.name,

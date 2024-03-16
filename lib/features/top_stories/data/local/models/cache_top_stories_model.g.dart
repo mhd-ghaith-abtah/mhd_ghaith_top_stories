@@ -11,8 +11,9 @@ CacheTopStoriesModel _$CacheTopStoriesModelFromJson(
     CacheTopStoriesModel(
       cacheDate: DateTime.parse(json['cacheDate'] as String),
       section: json['section'] as String,
-      stories:
-          TopStoriesResponse.fromJson(json['stories'] as Map<String, dynamic>),
+      stories: (json['stories'] as List<dynamic>)
+          .map((e) => TopStoryModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
 
 Map<String, dynamic> _$CacheTopStoriesModelToJson(
@@ -20,5 +21,5 @@ Map<String, dynamic> _$CacheTopStoriesModelToJson(
     <String, dynamic>{
       'cacheDate': instance.cacheDate.toIso8601String(),
       'section': instance.section,
-      'stories': instance.stories.toJson(),
+      'stories': instance.stories.map((e) => e.toJson()).toList(),
     };

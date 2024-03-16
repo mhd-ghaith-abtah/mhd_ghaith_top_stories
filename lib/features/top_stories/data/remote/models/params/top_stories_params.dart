@@ -23,7 +23,7 @@ class TopStoriesParams extends ParamsModel<TopStoriesParamsBody> {
       : super(baseUrl: AppConfigurations.baseUrl);
 
   @override
-  List<Object?> get props => [url, urlParams, requestType, body];
+  List<Object?> get props => [body];
 }
 
 @JsonSerializable(explicitToJson: true, ignoreUnannotated: true)
@@ -42,4 +42,7 @@ class TopStoriesParamsBody extends BaseBodyModel {
 
   @override
   Map<String, dynamic> toJson() => _$TopStoriesParamsBodyToJson(this);
+
+  @override
+  List<Object?> get props => [apiKey, section];
 }
